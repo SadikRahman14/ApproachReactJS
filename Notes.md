@@ -220,7 +220,7 @@ Then your package-lock.json will lock in:
 *So next time anyone installs this project — even if lodash 4.17.22 is out — they’ll get exactly 4.17.21.*
 
 <br><br><br>
-## <h2 align="center"> useState and useEffect </h2>
+## <h2 align="center"> Understanding useState </h2>
 
 `useState` is a function in React that allows us to create and manage **stateful variables**. When the state changes, the component **automatically re-renders** to reflect the updated value in the UI.
 
@@ -275,7 +275,7 @@ export default App
 https://github.com/acdlite/react-fiber-architecture
 ```
 
-## <h2 align="center"> Understanding useRef and useCallback </h2>
+## <h2 align="center"> Understanding useRef, useEffect and useCallback </h2>
 
 ```jsx
 
