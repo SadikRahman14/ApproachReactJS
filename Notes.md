@@ -267,5 +267,142 @@ function App() {
 export default App
 ```
 
+<br><br><br>
+## <h2 align="center"> React Fiber Architecture </h2>
+
+```txt
+
+https://github.com/acdlite/react-fiber-architecture
+```
+
+## <h2 align="center"> Understanding useRef and useCallback </h2>
+
+```jsx
+
+function App() {
+
+  // useRef hook
+  const passwordRef = useRef(null)
 
 
+  const copyPasswordToClipboard = useCallback(() => {
+    passwordRef.current?.select();
+    passwordRef.current?.setSelectionRange(0, 101);
+    window.navigator.clipboard.writeText(password);
+
+  }, [password])
+
+ return (
+    .......
+    .......
+    <input
+        type="text"
+        value={password}
+        className="outline-none w-full py-1 px-3"
+        placeholder="Password"
+        readOnly
+        ref={passwordRef}
+        
+    />
+    <button
+    onClick={copyPasswordToClipboard}
+    className='outline-none bg-blue-700 text-white px-3 py-0.5 shrink-0'
+    >copy</button>
+    ........
+    ........
+  ) 
+}
+
+export default App
+
+```
+
+<br><br><br>
+
+`useRef`  is like a hidden box where you can store anything, and React won’t care or re-render when it changes.
+
+1. You create the reference:
+```jsx
+const passwordRef = useRef(null);
+```
+
+This makes a ref object: { current: null }  
+Think of it as a container that will eventually point to something in the DOM (like a `<div>` or `<input>`)  
+
+
+2. You assign it to the input box:
+```js
+
+<input
+  ref={passwordRef}
+  ...
+/>
+```
+
+Now, after the component renders, React automatically fills in the current with the actual DOM node of that `<input>`.
+
+So now:  
+passwordRef.current === the actual input element
+<br>
+
+3. When copy button is clicked:
+```js
+passwordRef.current?.select();
+passwordRef.current?.setSelectionRange(0, 101);
+navigator.clipboard.writeText(password);
+```
+
+It’s like pointing to the actual box on the screen and saying:  
+*“Select this box’s text and copy it to the clipboard.”*
+
+
+`useCallback()`
+
+```js
+const passwordGenerator = useCallback(() => {
+    let pass = "";
+    let str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+
+    if(numbers) str += "0123456789";
+    if(characters) str += "!@#$%^&*(){}|?/><.,':";
+
+    for (let index = 1; index <= length; index++){
+      let randomIndex = Math.floor(Math.random() * str.length + 1)
+      pass += str.charAt(randomIndex);
+    }
+
+    setPassword(pass);
+
+  }, [length, numbers, characters, setPassword])
+
+```
+
+**What useCallback does:**
+>It memoizes (remembers) the function
+
+>It only re-creates the function when its dependencies change
+
+>So it returns the same function between renders unless something in the dependency array changes
+
+*Remembers the function and when dependencies[] changes it changes itself, unless stays as it is btween render. Its a optimization technique*
+<br><br><br>
+`useEffect()`
+
+```js
+
+useEffect(() => {
+  passwordGenerator()
+}, [length, numbers, characters, passwordGenerator])
+
+```
+
+>It runs once on mount (initial render)
+
+>Then runs again whenever any dependency changes
+
+>Commonly used for: API calls, DOM manipulation, syncing things
+
+*Re-runs the function when there is a change in dependencies[]*
+
+**Finally**  
+*`useEffect` runs code when something changes; `useCallback` remembers a function so it doesn’t change unless it has to.*

@@ -4,8 +4,6 @@ import viteLogo from '/vite.svg'
 import './App.css'
 
 
-
-
 function App() {
    const [counter, setCounter] = useState(0)
 
@@ -20,9 +18,8 @@ function App() {
       if(counter >= 1)
          setCounter(counter-1)
       else console.log("Not Anymore");
-      
-    
   }
+  
   return (
     <>
       <h1>Counter : {counter}</h1>

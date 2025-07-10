@@ -18,13 +18,15 @@ function App() {
             <Button color="red" colorName="Red" setColor={setColor}/>
             <Button color="green" colorName="Green" setColor={setColor}/>
             <Button color="gray" colorName="Gray" setColor={setColor}/>
-            
           </div>
         </div>
       </div>
-      
     </>
   )
 }
 
+/* 
+   setColor={setColor}
+   You are passing setColor function as props not object
+*/
 export default App
