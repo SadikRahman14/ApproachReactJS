@@ -24,31 +24,25 @@ NPX stands for *Node Package eXecute*. It is simply an NPM package runner. It al
 
 A bundler is a tool that:
 
->Takes your project files – HTML, CSS, JS, images, etc.  
-
->Figures out which files are connected to each other (through import, require, etc.)   
-
->Combines all of them into one or a few optimized files
-
->Outputs a final file that the browser can understand and load efficiently
+- Takes your project files – HTML, CSS, JS, images, etc.  
+- Figures out which files are connected to each other (through import, require, etc.)   
+- Combines all of them into one or a few optimized files
+- Outputs a final file that the browser can understand and load efficiently
 
 Why do we need bundlers?
 Imagine your React app is made of:
 
->50+ .js files (components, utils, etc.)
-
->20+ .css files
-
->Some images
-
->3rd-party libraries like React, Axios, etc.
+- 50+ .js files (components, utils, etc.)
+- 20+ .css files
+- Some images
+- 3rd-party libraries like React, Axios, etc.
 
 A bundler:
 
->Collects all this  
->Knows the correct order  
->Combines everything into 1 or few files  
->Optionally minifies, compresses, and optimizes it
+-Collects all this  
+-Knows the correct order  
+-Combines everything into 1 or few files  
+-Optionally minifies, compresses, and optimizes it
 
 <br><br>
 **How the transfer works:**
@@ -83,11 +77,9 @@ So now it knows all the files needed.
 **3. Transform the files**
 Each file goes through a transformer, like:
 
->Babel → Converts modern JS (ES6+) into older JS browsers understand
-
->CSS loaders → Process CSS
-
->Image loaders → Inline small images or copy them
+-Babel → Converts modern JS (ES6+) into older JS browsers understand
+-CSS loaders → Process CSS
+-Image loaders → Inline small images or copy them
 
 <br><br><br>
 **4. Wrap the code in functions**  
@@ -378,11 +370,9 @@ const passwordGenerator = useCallback(() => {
 ```
 
 **What useCallback does:**
->It memoizes (remembers) the function
-
->It only re-creates the function when its dependencies change
-
->So it returns the same function between renders unless something in the dependency array changes
+- It memoizes (remembers) the function
+- It only re-creates the function when its dependencies change
+- So it returns the same function between renders unless something in the dependency array changes
 
 *Remembers the function and when dependencies[] changes it changes itself, unless stays as it is btween render. Its a optimization technique*
 <br><br><br>
@@ -396,13 +386,221 @@ useEffect(() => {
 
 ```
 
->It runs once on mount (initial render)
-
->Then runs again whenever any dependency changes
-
->Commonly used for: API calls, DOM manipulation, syncing things
+- It runs once on mount (initial render)
+- Then runs again whenever any dependency changes
+- Commonly used for: API calls, DOM manipulation, syncing things
 
 *Re-runs the function when there is a change in dependencies[]*
 
 **Finally** 
 *`useEffect` runs code when something changes; `useCallback` remembers a function so it doesn’t change unless it has to.*
+
+
+## <h2 align="center"> Understanding Custom Hooks and Convert Currency Project </h2>
+
+`userCurrencyInfo` **hook**:
+
+```js
+import { useState, useEffect } from "react";
+
+function useCurrencyInfo(currency){
+    const [data, setData] = useState({})
+    useEffect(() => {
+        fetch(`https://api.exchangerate.host/latest?base=${currency}.json`)
+        .then((res) => res.json())
+        .then((res) => setData(res[currency]))
+        console.log(data);
+    }, [currency])
+    return data;
+}
+
+export default useCurrencyInfo;
+```
+
+**State Initialization:**
+* Intializes a state variable `data` as an empty object
+* setData is the function to update this state
+
+**Hook:**  
+* Runs everytime `currency` changes
+* A GET request to the api with the base currency and parses the response as JSON
+* calls `setData(res[currency])` to update the state with `res[currency]`
+
+**How to use this Hook?**
+
+```js
+const baseCurrency = 'usd'; 
+const currencyRates = useCurrencyInfo(baseCurrency);
+```
+* call `useCurrencyInfo` by passing a currency
+* hook returns the current rate
+* Whenever `baseCurrency` changes the hook automatically fetches new data amd updates `currencyRates`
+* Re-rendering happens beacuse of `useEffect`
+* `useState` sets the data
+
+<br><br>
+**<h4> InputBox.jsx: </h3>**
+
+**1. Props**
+```jsx
+function InputBox({
+    label,
+    amount,
+    onAmountChange,
+    onCurrencyChange,
+    currencyOptions = [],
+    selectCurrency = "usd",
+    amountDisable = false,
+    currencyDisable = false,
+    className = "",
+}) {..}
+
+```
+
+`label`: Text label for the input.  
+`amount`: The numeric value shown in the input.  
+`onAmountChange`: Callback when the amount input changes.  
+`onCurrencyChange`: Callback when the dropdown selection changes.  
+`currencyOptions`: Array of currency codes to populate the dropdown.  
+`selectCurrency`: The currently selected currency in the dropdown.  
+`amountDisable`: Boolean to disable the amount input.  
+`currencyDisable`: Boolean to disable the dropdown.  
+<br>
+**2.useId**
+```jsx
+const amountInputId = useId()
+```
+
+**3.Input for amounts:**
+
+```jsx
+<input
+  id={amountInputId}
+  className="outline-none w-full bg-transparent py-1.5"
+  type="number"
+  placeholder="Amount"
+  disabled={amountDisable}
+  value={amount}
+  onChange={(e) => onAmountChange && onAmountChange(Number(e.target.value))}
+/>
+```
+- `amountDisable` is false and user can write
+- `onChange`  is a method that records the change event and extracts the new input value.
+- It calls it parent's(`App.jsx`) `onAmountChange` and passes the Number  
+```html
+ <InputBox
+    ...
+    ...
+    onAmountChange={(amount) => setAmount(amount)}
+/>
+```
+ - `App.jsx` receives the number and updates its state using setAmount
+<br>
+
+**4.Select dropdown for currency:**
+
+```html
+<select
+  id={amountInputId}
+  className="rounded-lg px-1 py-1 bg-gray-100 cursor-pointer outline-none"
+  value={selectCurrency}
+  onChange={(e) => onCurrencyChange && onCurrencyChange(e.target.value)}
+  disabled={currencyDisable}
+>
+  {currencyOptions.map(currency => (
+    <option key={currency} value={currency}>
+      {currency}
+    </option>
+  ))}
+</select>
+
+```
+- Value controlled by `selectCurrency` prop.
+- Calls `onCurrencyChange` callback on user selection.
+- `currencyDisable` is false
+
+
+**The KEY saga:**
+- `currencyOptions` is an array of currency codes, e.g., `['usd', 'inr', 'eur']`
+- `.map()` iterates over this array, transforming each currency into an `<option>` element.
+- Each `<option>` shows the currency code as its visible text and uses it as the value attribute.
+
+ - `key={currency}` assigns a unique identifier for each `<option>` element.
+ - The currency string is both the key (for React’s tracking) and the label shown to users.
+ - **Keys must be unique among siblings but stable — don’t use indices if possible, better to use a unique id or string like the currency code.**
+
+<br><br>
+**<h4> App.jsx: </h3>**
+
+1.State Initialization:
+```jsx
+const [amount, setAmount] = useState("");
+const [from, setFrom] = useState("USD");
+const [to, setTo] = useState("INR");
+const [convertedAmount, setConvertedAmount] = useState(0);
+```
+
+`amount`: User input amount to convert.  
+`from`: The source currency (e.g. "USD").  
+`to`: The target currency (e.g. "INR").  
+`convertedAmount`: Result after conversion.  
+
+**2.Call the Custom Hook:**
+```jsx
+const currencyInfo = useCurrencyInfo(from);
+```
+- Returns an object like: `{ usd: 1, inr: 83.25, eur: 0.92, ... }`
+
+**3.Extract Options**
+```jsx
+const options = Object.keys(currencyInfo || {});
+```
+- The `currencyInfo` fetched from the custom hook looks like this:
+```json
+{
+  usd: 1,
+  inr: 83.25,
+  eur: 0.92,
+  ...
+}
+```
+**So the `keys` are: `['usd', 'inr', 'eur']`**
+
+<br>
+
+**4.Convert Function:**
+```jsx
+const convert = () => {
+  setConvertedAmount(amount * currencyInfo[to]);
+};
+```
+- The function stores the result in `convertedAmount` via `setConvertedAmount`
+
+<br>
+
+**5. First `InputBox` for From**
+```jsx
+<InputBox
+  label="From"
+  amount={amount}
+  currencyOptions={options}
+  onCurrencyChange={(currency) => setAmount(amount)}
+  selectCurrency={from}
+  onAmountChange={(amount) => setAmount(amount)}
+/>
+```
+
+**6. Second `InputBox` for To**
+```html
+<InputBox
+  label="To"
+  amount={convertedAmount}
+  currencyOptions={options}
+  onCurrencyChange={(currency) => setTo(currency)}
+  selectCurrency={to}
+  amountDisable
+/>
+
+```
+- `amount` is ofcourse the `convertedAmount`
+- `amountDisable` ressists the user to write
