@@ -404,5 +404,5 @@ useEffect(() => {
 
 *Re-runs the function when there is a change in dependencies[]*
 
-**Finally**  
+**Finally** 
 *`useEffect` runs code when something changes; `useCallback` remembers a function so it doesn’t change unless it has to.*
