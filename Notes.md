@@ -556,7 +556,7 @@ const currencyInfo = useCurrencyInfo(from);
 const options = Object.keys(currencyInfo || {});
 ```
 - The `currencyInfo` fetched from the custom hook looks like this:
-```json
+```jsx
 {
   usd: 1,
   inr: 83.25,
@@ -604,3 +604,174 @@ const convert = () => {
 ```
 - `amount` is ofcourse the `convertedAmount`
 - `amountDisable` ressists the user to write
+
+<br><br>
+
+## <h2 align="center"> Understanding Router and That one Navigation Project </h2>
+
+**main.jsx:**
+
+```jsx
+
+```
+
+
+## <h2 align="center"> Understanding Context </h2>
+
+**What is React Context API?**
+*The React Context Api is a way to share values like state or functions between components without having to explicitly pass props throughout every level of tree.*
+
+Let, there is a username need to be passed from the <Dashboard /> Component to a <Card/> which is inside the <RightSide/> component. Without context, the flow will be like this:
+<Dashboard username = "something">
+<RightSide username = "something">
+<Card username = "something">
+
+*It's tough to pass value in each component, Thats where comes in Context API.*
+
+<br><br>
+
+**<h4> Setting up Context</h4>**
+**1. Create the Context:**   
+```js
+import React from "react";
+
+const UserContext = React.createContext();
+
+export default UserContext;
+```
+
+**2. Provide the Context**    
+Wrap your component tree with a UserProvider component to provide the context value:  
+```jsx
+import React from "react";
+import UserContext from "./UserContext";
+
+const UserContextProvider = ({children}) => {
+    const [user, setUser] = React.useState(null)
+    return(
+        <UserContext.Provider value={{user, setUser}}>
+        {children}
+        </UserContext.Provider>
+    )
+}
+
+export default UserContextProvider
+```
+
+**3. Consume the Context**  
+Use the useContext hook to consume the context value in any component:
+```jsx
+import React, {useState, useContext} from 'react'
+import UserContext from '../context/UserContext'
+
+function Login() {
+    const [username, setUsername] = useState('')
+    const [password, setPassword] = useState('')
+
+    const {setUser} = useContext(UserContext)
+
+    const handleSubmit = (e) => {
+        e.preventDefault()
+        setUser({username, password})
+    }
+  return (
+    <div>
+        <h2>Login</h2>
+            <input type='text'
+            value={username}
+            onChange={(e) => setUsername(e.target.value) }
+            placeholder='username'  />
+            {" "}
+            <input type='text' 
+            value={password}
+            onChange={(e) => setPassword(e.target.value) }
+            placeholder='password'  />
+            <button onClick={handleSubmit}>Submit</button>
+    </div>
+  )
+}
+
+export default Login
+```
+
+**MORE:**  
+`{children}` refers to whatever is wrapped inside the component when u use it. A `PLACEHOLDER`
+```jsx
+<UserContextProvider>
+  <Login />
+  <Profile />
+</UserContextProvider>
+
+```
+
+**MORE:**  
+```jsx
+<UserContext.Provider value={{ user, setUser }}>
+```
+
+- Storing the current `user` and a way to update it `setUser`
+- Any Component which is wrapped inside Provider can access and update this state using `useContext()`
+
+**The Updates and Consumption:**  
+- In `Login.jsx` we are accessing the {user} from Provider and updating with the value of input box.
+- And in `UserProfile.jsx` we are again accessing the value which is already updated in `Login.jsx` and printing
+in UI. 
+
+*Just by Accessing the Provider we can access same variables from different Components*
+
+<br>
+
+**<h3>One More Way to handle Context</h3>**
+```jsx
+import React from "react";
+import { useContext } from "react";
+import { createContext } from "react";
+
+export const ThemeContext = createContext({
+    themeMode: "light",
+    darkTheme: () => {},
+    lightTheme: () => {},
+});
+
+export const ThemeProvider = ThemeContext.Provider;
+
+export default function useTheme(){
+    return useContext(ThemeContext);
+}
+```
+
+**Consumption:**
+```jsx
+import React from 'react'
+import { useContext } from 'react';
+import useTheme from "../context/theme.js"
+
+export default function ThemeBtn() {
+    
+    const {themeMode, lightTheme, darkTheme} = useTheme() // Stored useContext in useTheme before
+    const onChangeBtn = (e) => {
+        const darkModeStatus = e.currentTarget.checked;
+        if(darkModeStatus){
+            darkTheme();
+        }
+        else{
+            lightTheme();
+        }
+    }
+
+    return (
+        <label className="relative inline-flex items-center cursor-pointer">
+            <input
+                type="checkbox"
+                value=""
+                className="sr-only peer"
+                onChange={onChangeBtn}
+                checked={themeMode==="dark"}
+            />
+            <div className="...">Toggle Theme</span>
+        </label>
+    );
+}
+
+
+```
