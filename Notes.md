@@ -773,5 +773,83 @@ export default function ThemeBtn() {
     );
 }
 
-
 ```
+
+## <h2 align="center"> Understanding Local Storage and that one To-Do App </h2>
+
+**Why using `useEffect()` if there is no dependencies?**
+```js
+useEffect(() => {
+  const todos = JSON.parse(localStorage.getItem("todos"));
+  if (todos && todos.length > 0) {
+    setTodos(todos);
+  }
+}, []);
+```
+
+- You can't directly put `setTodos()` outside of `useEffect()`
+- `setTodos` triggers a re-render.
+- React components should not cause side effects directly during render.
+- `localStorage.getItem()` is a side effect (accessing external storage).
+
+<br><br>
+
+**Use of Context API in TO-DO App**
+
+`TodoContext.js`:
+```js
+import { createContext, useContext } from "react";
+
+export const TodoContext = createContext({
+    todos: [
+        {
+            id: 1,
+            todo: "Todo Msg",
+            completed: false,
+        }
+    ],
+
+    addTodo: (todo) => {},
+    updateTodo: (id, todo) => {},
+    deleteTodo: (id) => {},
+    toggleComplete: (id) => {}
+})
+
+export const useTodo = () => {
+    return useContext(TodoContext);
+}
+
+export const TodoProvider = TodoContext.Provider;
+```
+
+In `TodoForm.jsx`:
+```jsx
+const {addTodo} = useTodo()
+
+    const add = (e) => {
+      e.preventDefault()
+
+      if (!todo) return
+
+      addTodo({ todo, completed: false})
+      setTodo("")
+    }
+```
+
+<br>
+
+In `TodoItem.jsx`
+```js
+  const {updateTodo, deleteTodo, toggleComplete} = useTodo();
+
+    const editTodo = () => {
+        updateTodo(todo.id, {...todo, todo: todoMsg});
+        setIsTodoEditable(false);
+    }
+
+    const toggleCompleted = () => {
+        toggleComplete(todo.id);
+    }
+```
+
+***Used in Two Different Component***
