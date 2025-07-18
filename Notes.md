@@ -986,3 +986,12 @@ const client = new Client().setEndpoint(...).setProject(...);
 ``` 
 
 *But its better to put all these in a constructor inside a class gives u more control, better design and flexibility*
+
+<br><br><br>
+
+**Understanding Database, File Upload and Custom Queries**  
+<br>
+[`config.js`](/12MegaBlog/src/appwrite/config.appwrite.js)  
+[`Documentation`]("https://appwrite.io/docs/products/databases/databases")
+
+*The Appwrite Backend is real basic, Just read the documentation and codes*
