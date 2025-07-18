@@ -853,3 +853,136 @@ In `TodoItem.jsx`
 ```
 
 ***Used in Two Different Component***
+
+
+
+## <h2 align="center"> Understanding Redux Toolkit </h2>
+
+**Understanding Terms**
+`State:`
+*The data your app using at a given time*  
+```js
+const initialState = {
+  todos: [{ id: 1, text: "Hello world" }]
+}
+```
+- This initialState is your starting state.  
+- Later, state will update as users add or remove todo
+
+<br>
+
+`Reducer:`
+*A reducer is a function that takes the current state and an action, and returns the new state*
+
+Think:
+>“What should the new data look like when something happens?”
+
+```js
+addTodo: (state, action) => {
+  const todo = {
+    id: nanoid(),
+    text: action.payload,
+  };
+  state.todos.push(todo);
+}
+```
+
+<br>
+
+`Action:` *An object which tells Redux to do something when something happens*
+
+```js
+{
+  type: 'todo/addTodo',
+  payload: 'Buy milk'
+}
+```
+- `type:` what kind of action
+- `payload:` any data you want to send (optional)
+
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+
+## <h2 align="center"> Understanding A Complete React Project</h2>
+
+**`.env`**
+
+***Everytime any change happens in .env file, we must reload***
+
+```js
+VITE_APPWRITE_URL=""
+VITE_APPWRITE_PROJECT_ID=""
+VITE_APPWRITE_DATABASE_ID=""
+VITE_APPWRITE_COLLECTION_ID=""
+VITE_APPWRITE_BUCKET_ID=""
+```
+
+*Understand that its we are not creating a React App, We must use `VITE_` at the start before all the variable.*
+
+**Why?**
+
+This is a security measure.
+
+- Vite loads all `.env` variables, but:
+- It only exposes the ones prefixed with `VITE_` to the browser (i.e., your frontend bundle).
+- Everything else stays on the server side and is not available to the client, protecting sensitive data.
+
+**Also the the access system is different that Backend**
+
+Vite does not use:
+```js
+console.log(process.env.SECRET_KEY);
+```
+
+It use:
+```js
+console.log(import.meta,env.VITE_APPWRITE_URL);
+```
+
+*In programming, especially web development, "expose" means making something accessible or visible to a certain environment or part of the code.*
+
+<br><br><br>
+
+
+
+
+**`config.js` : A production level practice:**
+
+```js
+const config = {
+    appwriteUrl: String(import.meta.env.VITE_APPWRITE_URL),
+    appwriteProjectId: String(import.meta.env.VITE_APPWRITE_PROJECT_ID),
+    appwriteDatabaseId: String(import.meta.env.VITE_APPWRITE_DATABASE_ID),
+    appwriteCollectionId: String(import.meta.env.VITE_APPWRITE_COLLECTION_ID),
+    appwriteBucketId: String(import.meta.env.VITE_APPWRITE_BUCKET_ID)
+}
+
+export default config;
+```
+
+**Why config.js is important:**
+- `config.js` centralizes your environment configuration, making your app cleaner, safer, and easier to manage.
+- This ensures that even if the variable is `undefined`, it becomes a string (helps prevent certain runtime errors).
+
+<br><br><br>
+
+
+**Understanding Authentication through Appwrite**
+
+[`auth.js`](/12MegaBlog/src/appwrite/auth.js)
+
+*Its more efficient to create a instance of the class and export from current file than exporting the whole class.*
+
+Now we can just access by `authService.login()`  
+We dont need to call instance in other files `const authService = new AuthService();`
+
+<br><br><br>
+
+Initiating `Client:`
+We could've done this too..
+```js
+const client = new Client().setEndpoint(...).setProject(...);
+``` 
+
+*But its better to put all these in a constructor inside a class gives u more control, better design and flexibility*
