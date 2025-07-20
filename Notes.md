@@ -995,3 +995,126 @@ const client = new Client().setEndpoint(...).setProject(...);
 [`Documentation`]("https://appwrite.io/docs/products/databases/databases")
 
 *The Appwrite Backend is real basic, Just read the documentation and codes*
+
+<br><br><br>
+
+**Understanding Redux-Toolkit**
+
+`Terms:`
+- `Reducer:` A pure function that takes the current state and an action then returns the updated state
+
+  ```js
+  const authSlice = createSlice({
+  name: "auth",
+  initialState: {
+    status: false,
+    userData: null
+  },
+    reducers: {
+      login: (state, action) => {
+        state.status = true;
+        state.userData = action.payload.userData;
+      },
+      logout: (state) => {
+        state.status = false;
+        state.userData = null;
+      }
+    }
+  });
+
+  ```
+  -  In Redux Toolkit, the reducers field inside createSlice() is an object where each key is a reducer function name, and each value is the actual reducer function that handles a specific type of action.
+
+  - ***With Redux Toolkit, the data and logic (reducers) are separated and centralized in the store, and you read/write from anywhere using useSelector and useDispatch***
+
+
+
+<br>
+
+- `Action:` A object describing what happened and what data to use.
+
+    ```js
+    {
+      type: "auth/login",
+      payload: { name: "Sadik", email: "you@example.com" }
+    }
+    ```
+    - `type:` what kind of change is needed.
+    - `payload:` any data needed to make the change.
+
+    An Action is a form you submit to the bank:
+    - "I want to login" (action type: `login`)
+    - With my info (payload: user data)
+
+<br>
+
+- `State:`
+
+    ```js
+    {
+      auth: {
+        status: false,
+        userData: null
+      }
+    }
+    ```
+    *State is like a bank database- it stores acoount balance and personal info. Everytime something changes, the reducer updates the data*
+
+<br>
+
+- `Dispatch:` A function you call to send the action to the reducer.
+
+  ```js
+  dispatch(login(userData))
+  ```
+  - This tell redux, "Something happended, go update the state!"
+  - Dispatch is submitting a request to bank clerk. You give them the form( `action` ) and they send it to manager ( `reducer` )
+
+<br><br><br>
+
+
+
+**The Redux Flow in MegaBlog:**
+
+**1. In [store/authSlice.js](/12MegaBlog/src/store/authSlice.js),**
+- You define a slice of the state: `auth`
+- Define two actions:
+  - `login:` sets login status to true and stores user data
+  - `logout:` clears user data
+- Redux Toolkit automatically creates action creators and a reducer function.
+
+<br>
+
+
+**2. In [store/store.js](/12MegaBlog/src/store/store.js),**
+
+  - `configureStore` combines all your slices into one global Redux state
+  - This state will be accesible by `useDispatch` and `useSelector`
+
+<br>
+
+**3. In [main.jsx](/12MegaBlog/src/main.jsx),**
+
+  - Wrap the entire app in `<Provider store={store}>`
+  - This makes the redux store available to every component using `useDuspatch` and `useSelector`
+
+<br>
+
+**4. In [App.jsx](/12MegaBlog/src/App.jsx),**
+
+  - `const dispatch = useDispatch()` to access the redux state
+  - On first load useEffect() check if the user is logged in
+  - If yes then `dispatch(login({ userdata }))` which updates redux state
+  - If no then `dispatch(logout())` which resets the auth state
+
+<br>
+
+***We can say `useSelector()` only a getter it cannot update states, it just reads from the redux store  
+We must use `useDispatch()` to call an action which will be handled by a reducer, which updates the state***
+
+**Summarry of the FLOW:**
+1. Define initial state and reducers in `authSlice.js` 
+2. Create the store and combine reducers in `store.js `
+3. Provide the store globally via Provider in `main.jsx` 
+4. Dispatch login/logout actions in `App.jsx` using `useDispatch` 
+5. Access auth state from any component using `useSelector` 
