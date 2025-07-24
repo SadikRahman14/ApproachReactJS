@@ -1139,3 +1139,75 @@ const handleLogin = () => {
 
 ***Container is a component whose main job is to apply consistent CSS styling to its children.***
 
+<br><br><br>
+
+**<h3> Understanding `useForm()` and  Login, Signup Components </h3>**
+
+```html
+<form onSubmit={handleSubmit(login)} className='mt-8'>
+                <div className='space-y-5'>
+                    <Input
+                    label="Email: "
+                    placeholder="Enter your email"
+                    type="email"
+                    {...register("email", {
+                        required: true,
+                        validate: {
+                            matchPatern: (value) => /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(value) ||
+                            "Email address must be a valid address",
+                        }
+                    })}
+                    />
+                    <Input
+                    label="Password: "
+                    type="password"
+                    placeholder="Enter your password"
+                    {...register("password", {
+                        required: true,
+                    })}
+                    />
+                    <Button
+                    type="submit"
+                    className="w-full"
+                    >Sign in</Button>
+                </div>
+            </form>
+```
+  
+***`useForm()` is a custome hook provided by <span style="color:red">React Hook Form</span>. Provides tools to manage form state, validation, registration and submission handling - without needing to manage a bunch of `useState()` or `onChange()` handlers manually*** 
+
+<br>
+
+**`register():`**  
+It registers or connects an `<input>` field to the form system, so react hook form can-
+- Track the field value
+- Track whether it has changed
+- validate it
+- Induce it in form submission
+
+<br>
+
+**Without `register`:**
+```jsx
+const [email, setEmail] = useState("");
+
+<input
+  value={email}
+  onChange={(e) => setEmail(e.target.value)}
+/>
+```
+- Storing value with `useState()`
+- Updating it manually in every change
+- Managing their state for every change
+
+<br>
+
+With `register`:
+```jsx
+<input {...register("email")} />
+```
+- Tracks the `value` of email
+- Tracks `onChange()` automatically
+
+**No need of `useState()`, `value` or `onChange()`**
+
