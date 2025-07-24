@@ -464,12 +464,30 @@ function InputBox({
 `currencyOptions`: Array of currency codes to populate the dropdown.  
 `selectCurrency`: The currently selected currency in the dropdown.  
 `amountDisable`: Boolean to disable the amount input.  
-`currencyDisable`: Boolean to disable the dropdown.  
+`currencyDisable`: Boolean to disable the dropdown. 
+
 <br>
-**2.useId**
+
+**2.useId()**
 ```jsx
-const amountInputId = useId()
+const id = useId()
+.........................
+
+<input
+    type = {type}
+    className={'...'}
+    ref={ref}
+    {...props}
+    id={id}
+/>
+
 ```
+- Generating a unique id for this instance of the component
+- "The `<label/>` is linked to the correct input through `htmlFor` attribute"
+- No two components rendered on the same page will have the same ID.
+
+<br>
+
 
 **3.Input for amounts:**
 
@@ -528,6 +546,7 @@ const amountInputId = useId()
  - `key={currency}` assigns a unique identifier for each `<option>` element.
  - The currency string is both the key (for React’s tracking) and the label shown to users.
  - **Keys must be unique among siblings but stable — don’t use indices if possible, better to use a unique id or string like the currency code.**
+ - **If a html element repeats must use keys**
 
 <br><br>
 **<h4> App.jsx: </h3>**
@@ -856,53 +875,6 @@ In `TodoItem.jsx`
 
 
 
-## <h2 align="center"> Understanding Redux Toolkit </h2>
-
-**Understanding Terms**
-`State:`
-*The data your app using at a given time*  
-```js
-const initialState = {
-  todos: [{ id: 1, text: "Hello world" }]
-}
-```
-- This initialState is your starting state.  
-- Later, state will update as users add or remove todo
-
-<br>
-
-`Reducer:`
-*A reducer is a function that takes the current state and an action, and returns the new state*
-
-Think:
->“What should the new data look like when something happens?”
-
-```js
-addTodo: (state, action) => {
-  const todo = {
-    id: nanoid(),
-    text: action.payload,
-  };
-  state.todos.push(todo);
-}
-```
-
-<br>
-
-`Action:` *An object which tells Redux to do something when something happens*
-
-```js
-{
-  type: 'todo/addTodo',
-  payload: 'Buy milk'
-}
-```
-- `type:` what kind of action
-- `payload:` any data you want to send (optional)
-
-
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-
 
 ## <h2 align="center"> Understanding A Complete React Project</h2>
 
@@ -946,8 +918,8 @@ console.log(import.meta,env.VITE_APPWRITE_URL);
 
 
 
+**<h3> `config.js` : A production level practice </h3>**
 
-**`config.js` : A production level practice:**
 
 ```js
 const config = {
@@ -967,10 +939,10 @@ export default config;
 
 <br><br><br>
 
+**<h3> Understanding Authentication through Appwrite </h3>**
 
-**Understanding Authentication through Appwrite**
 
-[`auth.js`](/12MegaBlog/src/appwrite/auth.js)
+[`auth.js`](/12MegaBlog/src/appwrite/auth.appwrite.js)
 
 *Its more efficient to create a instance of the class and export from current file than exporting the whole class.*
 
@@ -989,8 +961,9 @@ const client = new Client().setEndpoint(...).setProject(...);
 
 <br><br><br>
 
-**Understanding Database, File Upload and Custom Queries**  
-<br>
+
+**<h3> Understanding Database, File Upload and Custom Queries </h3>**
+
 [`config.js`](/12MegaBlog/src/appwrite/config.appwrite.js)  
 [`Documentation`]("https://appwrite.io/docs/products/databases/databases")
 
@@ -998,7 +971,8 @@ const client = new Client().setEndpoint(...).setProject(...);
 
 <br><br><br>
 
-**Understanding Redux-Toolkit**
+**<h3> Understanding Redux-Toolkit </h3>**
+
 
 `Terms:`
 - `Reducer:` A pure function that takes the current state and an action then returns the updated state
@@ -1026,7 +1000,6 @@ const client = new Client().setEndpoint(...).setProject(...);
   -  In Redux Toolkit, the reducers field inside createSlice() is an object where each key is a reducer function name, and each value is the actual reducer function that handles a specific type of action.
 
   - ***With Redux Toolkit, the data and logic (reducers) are separated and centralized in the store, and you read/write from anywhere using useSelector and useDispatch***
-
 
 
 <br>
@@ -1118,3 +1091,51 @@ We must use `useDispatch()` to call an action which will be handled by a reducer
 3. Provide the store globally via Provider in `main.jsx` 
 4. Dispatch login/logout actions in `App.jsx` using `useDispatch` 
 5. Access auth state from any component using `useSelector` 
+
+<br><br>
+
+**<h3> `useNavigate()` and `<Link>` </h3>**
+
+**When to use`<Link>:`**  
+```jsx
+<Link to="/about">About</Link>
+```
+- While not doing anything else besides navigating
+
+<br>
+
+**When to use `useNavigate()`:**
+```jsx
+const handleLogin = () => {
+  if (isAuthenticated) {
+    navigate('/dashboard');
+  } else {
+    alert("Login first");
+  }
+};
+```
+
+- When need to run extra logic before naviagting
+- Inside a function or event handler
+- Depends on some dynamic state or conditions
+
+<br><br><br>
+
+**<h3> Why  [Container?](/12MegaBlog/src//components/container/) </h3>**
+
+```jsx
+<header className='py-3 shadow bg-gray-500'>
+  <Container>
+    <nav className='flex'>
+      ...
+    </nav>
+  </Container>
+</header>
+
+```
+
+- Wraps any content you put inside it
+- Helps mantain a consistent design across your whole app
+
+***Container is a component whose main job is to apply consistent CSS styling to its children.***
+
