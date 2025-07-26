@@ -1,9 +1,11 @@
 import React from 'react'
+import { useId } from 'react';
 
 const Input = React.forwardRef( function Input({
     label,
     type = "text",
-    className = ""
+    className = "",
+    ...props
 }, ref){
     const id = useId();
     return(
