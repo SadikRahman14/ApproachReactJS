@@ -1211,3 +1211,175 @@ With `register`:
 
 **No need of `useState()`, `value` or `onChange()`**
 
+<br><br><br>
+
+**<h3> Rich Text Editor(RTE) from tinymce </h3>**
+
+**Full Breakdown**
+
+```jsx
+export default function RTE({ name, control, label, defaultValue = "" }) {
+```
+- `name:` The name of the field in the form
+- `control:` The control object from `useForm()` hook
+- `label:` The label text for the editor
+- `defaultValue:` The initial content of the editor
+
+<br>
+
+**Controller Setup**  
+*`Controller` is like a translator between React Hook Form and a fancy input collection like RTE that doesn't work with `register()` directly*
+
+Why we need `Controller`?  
+Normal HTML inputs like `<input>`, `<select>`, etc. can be registered directly with `register()`.
+But for complex components like RTE, we need a way to connect them to the form system.  
+Thats where `Controller` comes in.
+
+- It wraps the custom component (RTE in this case)
+- It connects the component to the form control
+- It handles value changes and validation
+
+```jsx
+<Controller
+  name={name || "content"}
+  control={control}
+  render={({ field: { onChange } }) => (
+    <Editor
+      initialValue={defaultValue}
+      ...
+      onEditorChange={onChange}
+    />
+  )}
+/>
+```
+- `name`: Uses the provided name or defaults to "content"
+- `control={}`: Passes the control object from `useForm()`
+- `render`: Renders the RTE component manually and connect it to the form
+- `onEditorChange={}`: Connects the RTE's change event to the form's change handler
+
+<br>
+
+**Editor Config:**
+```jsx
+init={{
+  height: 500,
+  menubar: true,
+  plugins: [...],
+  toolbar: "...",
+  content_style: "..."
+}}
+```
+- Just customizes the TinyMCE toolbars, height, plugins, and styles
+
+
+<br>
+
+**[RTE.jsx](/12MegaBlog/src/components/RTE.jsx)**
+
+<br><br><br>
+
+**<h3> Understanding Posting A Blog </h3>**
+
+**Submit function**
+```jsx
+    const navigate = useNavigate();
+    const userData = useSelector((state) => state.auth.userData);
+
+    const submit = async (data) => {
+        if (post) {
+            const file = data.image[0] ? await appwriteService.uploadFile(data.image[0]) : null;
+            if (file) {
+                appwriteService.deleteFile(post.featuredImage);
+            }
+
+            const dbPost = await appwriteService.updatePost(post.$id, {
+                ...data,
+                featuredImage: file ? file.$id : undefined,
+            });
+
+            if (dbPost) {
+                navigate(`/post/${dbPost.$id}`);
+            }
+        } else {
+            const file = await appwriteService.uploadFile(data.image[0]);
+            const fileId = file.$id;
+            data.featuredImage = fileId;
+
+            const dbPost = await appwriteService.createPost({ ...data, userId: userData.$id });
+
+            if (dbPost) {
+                navigate(`/post/${dbPost.$id}`);
+            }
+        }
+    };
+
+```
+- Checks if `post` exists. The if-else created a Update VS Create scenario
+
+- In Edit mode:
+  - Uploads the new image if provided
+  - Deletes the old image if a new one is uploaded
+  - Updates the post in the database with new data and image ID
+- In Create mode:
+  - Uploads the image and gets its ID
+  - Creates a new post with the provided data and user ID
+
+<br>
+
+**Slug Transform**
+```jsx
+const slugTransform = useCallback((value) => {
+    if (value && typeof value === "string")
+        return value
+            .trim()
+            .toLowerCase()
+            .replace(/[^a-zA-Z\d\s]+/g, "-")
+            .replace(/\s/g, "-");
+
+    return "";
+}, []);
+```
+
+- Converts the title to a URL-friendly slug
+- `.replace(/[^a-zA-Z\d\s]+/g, "-")` → replaces non-alphanumeric characters with `-`
+- `.replace(/\s/g, "-")` → replaces all spaces with `-`
+  
+`Input`: " My First Blog Post!! "  
+`Output`: "my-first-blog-post"
+
+
+<br>
+
+**`useEffect()` for dynamic slug creation**
+
+```jsx
+useEffect(() => {
+    const subscription = watch((value, { name }) => {
+        if (name == "title") {
+            setValue("slug", slugTransform(value.title), { shouldValidate: true });
+        }
+    });
+
+    return () => subscription.unsubscribe();
+}, [watch, slugTransform, setValue]);
+```
+First understand the `watch()` function:
+  - `watch()` is from react-hook-form , it listens for changes in form fields. Lets you react to changes in one or more field without needing to set up individual `onChange` handlers.
+
+  - If the title filed changes, it calls the `slugTransform` function to update the slug field
+  - Then sets the new slug value using `setValue()` 
+
+<br>
+
+You can still use `onChange()`:
+```jsx
+<input {...register("title", { onChange: (e) => console.log(e.target.value) })} />
+```
+
+<br>
+
+`shouldValidate: true:`  
+*Tells the form, "After updating ths slug, please re-check if it meets validation rules."*
+
+<br>
+
